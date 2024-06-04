@@ -12,7 +12,6 @@ export function Home({ navigation }) {
       const login = logins.find(login => login.email === email && login.senha === senha);
       if (login) {
         Alert.alert('Sucesso', 'Login realizado com sucesso.');
-        // Navegar para a tela de Cardápio após o login bem-sucedido
         navigation.navigate('Cardapio');
       } else {
         Alert.alert('Erro', 'Email ou senha incorretos.');
