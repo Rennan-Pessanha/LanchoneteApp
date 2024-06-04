@@ -1,36 +1,40 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Alert } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { adicionarLogin } from '../../../database/BaseDados';
 
-export function Home({ navigation }) {
+const Cadastro = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
+  const [repetirSenha, setRepetirSenha] = useState('');
 
-  const handleLogin = async () => {
-    try {
-      const logins = JSON.parse(await AsyncStorage.getItem('logins')) || [];
-      const login = logins.find(login => login.email === email && login.senha === senha);
-      if (login) {
-        Alert.alert('Sucesso', 'Login realizado com sucesso.');
-        // Navegar para a tela de Cardápio após o login bem-sucedido
-        navigation.navigate('Cardapio');
-      } else {
-        Alert.alert('Erro', 'Email ou senha incorretos.');
-      }
-    } catch (error) {
-      console.error('Erro ao fazer login:', error);
-      Alert.alert('Erro', 'Erro ao fazer login. Tente novamente.');
+  const handleCadastro = () => {
+    // Verifique se todos os campos estão preenchidos
+    if (!email || !senha || !repetirSenha) {
+      alert('Preencha todos os campos antes de cadastrar.');
+      return;
     }
+  
+    // Verifique se as senhas coincidem
+    if (senha !== repetirSenha) {
+      alert('As senhas digitadas não coincidem.');
+      return;
+    }
+  
+    // Chame a função adicionarLogin para inserir o login no banco de dados
+    adicionarLogin(email, senha, (id) => {
+      if (id) {
+        // Redirecione o usuário de volta à tela inicial após o cadastro
+        alert('Login cadastrado com sucesso.');
+        navigation.navigate('Home');
+      } else {
+        alert('Erro ao cadastrar o login. Tente novamente.');
+      }
+    });
   };
 
   return (
     <View style={styles.container}>
-      <Image
-        source={require('../../../assets/Logo.png')}
-        style={styles.logoImage}
-      />
-      <Text style={styles.logo}>Tempero Carioca</Text>
-
+      <Text style={styles.logo}>Faça o seu cadastro</Text>
       <View style={styles.inputView}>
         <TextInput
           style={styles.inputText}
@@ -40,7 +44,6 @@ export function Home({ navigation }) {
           onChangeText={setEmail}
         />
       </View>
-
       <View style={styles.inputView}>
         <TextInput
           style={styles.inputText}
@@ -51,17 +54,22 @@ export function Home({ navigation }) {
           onChangeText={setSenha}
         />
       </View>
-
-      <TouchableOpacity style={styles.loginBtn} onPress={handleLogin}>
-        <Text style={styles.loginText}>LOGIN</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.SignBtn} onPress={() => navigation.navigate('Cadastro')}>
-        <Text style={styles.signupText}>Signup</Text>
+      <View style={styles.inputView}>
+        <TextInput
+          style={styles.inputText}
+          placeholder="Repetir Senha"
+          placeholderTextColor="#003f5c"
+          secureTextEntry
+          value={repetirSenha}
+          onChangeText={setRepetirSenha}
+        />
+      </View>
+      <TouchableOpacity style={styles.loginBtn} onPress={handleCadastro}>
+        <Text style={styles.loginText}>Cadastrar</Text>
       </TouchableOpacity>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -69,11 +77,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#00008b',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  logoImage: {
-    width: 100,
-    height: 100,
-    marginBottom: 20,
   },
   logo: {
     fontWeight: 'bold',
@@ -122,4 +125,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Home;
+export default Cadastro;
