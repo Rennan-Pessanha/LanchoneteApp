@@ -1,11 +1,23 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Modal } from 'react-native';
+import { useNavigation, useRoute, StackActions } from '@react-navigation/native';
 
 const Carrinho = () => {
   const route = useRoute();
   const navigation = useNavigation();
   const [cart, setCart] = useState(route.params.cart);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [pixKey, setPixKey] = useState('');
+
+  const generatePixKey = () => {
+    const randomKey = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    setPixKey(randomKey);
+  };
+
+  const openModal = () => {
+    generatePixKey();
+    setModalVisible(true);
+  };
 
   const increaseQuantity = (itemId) => {
     setCart(prevCart => 
@@ -59,13 +71,33 @@ const Carrinho = () => {
       <TouchableOpacity onPress={() => navigation.goBack()} style={styles.goBackButton}>
         <Text style={styles.goBackText}>Voltar ao Cardápio</Text>
       </TouchableOpacity>
+      <TouchableOpacity onPress={openModal} style={styles.paymentButton}>
+        <Text style={styles.paymentButtonText}>Realizar Pagamento</Text>
+      </TouchableOpacity>
+      <Modal
+        visible={modalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Pagamento via Pix</Text>
+            <Text style={styles.modalText}>Use a chave abaixo para realizar o pagamento:</Text>
+            <Text style={styles.pixKey}>{pixKey}</Text>
+            <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeButton}>
+              <Text style={styles.closeButtonText}>Fechar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     backgroundColor: '#00008b',
     padding: 20,
     alignItems: 'center',
@@ -87,7 +119,7 @@ const styles = StyleSheet.create({
     padding: 10,
     margin: 10,
     alignItems: 'center',
-    width: '45%', // Ajuste a largura para acomodar duas colunas
+    width: '45%',
   },
   itemImage: {
     width: 80,
@@ -102,14 +134,14 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#fff',
-    textAlign: 'center', // Ajuste para centralizar o texto
+    textAlign: 'center',
   },
   itemPrice: {
     fontSize: 18,
     color: '#FFD700',
     fontWeight: 'bold',
     fontFamily: 'monospace',
-    textAlign: 'center', // Ajuste para centralizar o texto
+    textAlign: 'center',
   },
   quantityContainer: {
     flexDirection: 'row',
@@ -154,6 +186,54 @@ const styles = StyleSheet.create({
   },
   goBackText: {
     color: '#fff',
+    fontSize: 18,
+  },
+  paymentButton: {
+    marginTop: 20,
+    backgroundColor: '#FFD700',
+    padding: 10,
+    borderRadius: 10,
+  },
+  paymentButtonText: {
+    color: '#000',
+    fontSize: 18,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 139, 0.8)',
+  },
+  modalContent: {
+    backgroundColor: '#1E90FF',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#FFD700',
+    marginBottom: 20,
+  },
+  modalText: {
+    fontSize: 18,
+    color: '#fff',
+    marginBottom: 20,
+  },
+  pixKey: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#FFD700',
+    marginBottom: 20,
+  },
+  closeButton: {
+    backgroundColor: '#FFD700',
+    padding: 10,
+    borderRadius: 10,
+  },
+  closeButtonText: {
+    color: '#000',
     fontSize: 18,
   },
 });
